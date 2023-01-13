@@ -1,7 +1,10 @@
+import { useMutation } from "@apollo/client";
 import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
 import { FormEvent, HtmlHTMLAttributes, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import userOperations from "../../graphql/operations/user";
+import { createUsernameData, createUsernameVariables } from "../../util/types";
 
 interface IAuthProps {
   session: Session | null;
@@ -10,10 +13,20 @@ interface IAuthProps {
 
 const Auth: React.FC<IAuthProps> = ({ session, reloadSession }) => {
   const [username, setUsername] = useState("");
+  const [createUsername, { data, loading, error }] = useMutation<
+    createUsernameData,
+    createUsernameVariables
+  >(userOperations.Mutations.createUsername);
 
-  const handleSubmit = (e: FormEvent) => {
+  //console.log(data, loading, error);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!username) return;
+
     try {
+      await createUsername({ variables: { username } });
     } catch (error) {
       console.log("Username submit error ", error);
     }
