@@ -1,10 +1,12 @@
 import { useMutation } from "@apollo/client";
 import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
-import { FormEvent, HtmlHTMLAttributes, useState } from "react";
+import { FormEvent, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import userOperations from "../../graphql/operations/user";
+import toast from "react-hot-toast";
 import { createUsernameData, createUsernameVariables } from "../../util/types";
+import Spinner from "../ui/spinner";
 
 interface IAuthProps {
   session: Session | null;
@@ -13,10 +15,10 @@ interface IAuthProps {
 
 const Auth: React.FC<IAuthProps> = ({ session, reloadSession }) => {
   const [username, setUsername] = useState("");
-  const [createUsername, { data, loading, error }] = useMutation<
-    createUsernameData,
-    createUsernameVariables
-  >(userOperations.Mutations.createUsername);
+  const [createUsername, { /*data,we use it bellow*/ loading, error }] =
+    useMutation<createUsernameData, createUsernameVariables>(
+      userOperations.Mutations.createUsername
+    );
 
   //console.log(data, loading, error);
 
@@ -26,8 +28,24 @@ const Auth: React.FC<IAuthProps> = ({ session, reloadSession }) => {
     if (!username) return;
 
     try {
-      await createUsername({ variables: { username } });
-    } catch (error) {
+      //i use data here instead of above
+      const { data } = await createUsername({ variables: { username } });
+
+      if (!data?.createUsername) throw new Error();
+
+      if (data.createUsername.error) {
+        const {
+          createUsername: { error },
+        } = data;
+        throw new Error(error);
+      }
+
+      toast.success("Username Successfully created!");
+
+      //Reload session to get the new username
+      reloadSession();
+    } catch (error: any) {
+      toast.error(error?.message);
       console.log("Username submit error ", error);
     }
   };
@@ -48,7 +66,7 @@ const Auth: React.FC<IAuthProps> = ({ session, reloadSession }) => {
               }}
             />
             <button className="bg-red-500 hover:bg-red-600 py-2 px-3 w-full rounded font-semibold">
-              Register
+              {loading ? <Spinner /> : "Register"}
             </button>
           </form>
         ) : (

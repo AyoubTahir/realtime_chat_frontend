@@ -7,9 +7,12 @@ import Chat from "../components/Chat";
 export default function Home() {
   const { data: session } = useSession();
 
-  //console.log("---->", session);
+  console.log("---->", session);
 
-  const reloadSession = () => {};
+  const reloadSession = () => {
+    const event = new Event("visibilitychange");
+    document.dispatchEvent(event);
+  };
 
   return (
     <>
@@ -21,7 +24,7 @@ export default function Home() {
       </Head>
       <main className="">
         {session?.user.username ? (
-          <Chat />
+          <Chat session={session} />
         ) : (
           <Auth session={session} reloadSession={reloadSession} />
         )}
