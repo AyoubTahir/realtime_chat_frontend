@@ -1,15 +1,41 @@
+import { useLazyQuery, useQuery } from "@apollo/client";
+import {
+  ChangeEvent,
+  FormEvent,
+  HTMLInputTypeAttribute,
+  useState,
+} from "react";
+import userOperations from "../../../../graphql/operations/user";
+import { searchUsersData, searchUsersInput } from "../../../../util/types";
+
 type indexProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
 const index: React.FC<indexProps> = ({ isOpen, onClose }) => {
+  const [username, setUsername] = useState("");
+  const [searchUsers, { data, error, loading }] = useLazyQuery<
+    searchUsersData,
+    searchUsersInput
+  >(userOperations.Queries.searchUsers);
+  const closeWhenClickedOutside = (e: Event) => {
+    if ((e.target as Element).id === "chat_modal") {
+      onClose();
+    }
+  };
+
+  const HandleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    searchUsers({ variables: { username } });
+  };
   return (
     <div
-      id="crypto-modal"
+      id="chat_modal"
       className={`fixed flex justify-center items-center z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full bg-[#0000006b] ${
         !isOpen && "hidden"
       }`}
+      onClick={closeWhenClickedOutside as any}
     >
       <div className="relative w-full h-full max-w-md md:h-auto">
         <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -27,9 +53,9 @@ const index: React.FC<indexProps> = ({ isOpen, onClose }) => {
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fill-rule="evenodd"
+                fillRule="evenodd"
                 d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd"
+                clipRule="evenodd"
               ></path>
             </svg>
             <span className="sr-only">Close modal</span>
@@ -42,6 +68,22 @@ const index: React.FC<indexProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="p-6">
+            <form onSubmit={HandleSearch}>
+              <input
+                type="text"
+                className="w-full py-2 px-2 rounded border border-gray-400 text-black"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+                placeholder="Enter a Username"
+              />
+              <button
+                className="w-full py-2 bg-slate-700 mt-2 rounded"
+                disabled={!username}
+              >
+                Search
+              </button>
+            </form>
             <p className="text-sm font-normal text-gray-500 dark:text-gray-400">
               Connect with one of our available wallet providers or create a new
               one.

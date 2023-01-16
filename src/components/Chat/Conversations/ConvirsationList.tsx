@@ -11,13 +11,14 @@ const ConvirsationList: React.FC<ConvirsationListProps> = ({ session }) => {
   const onClose = () => {
     setIsOpen(false);
   };
+  const onOpen = () => {
+    setIsOpen(true);
+  };
   return (
     <div className="w-full">
       <button
         className="bg-slate-800 w-full font-semibold hover:bg-slate-900 py-3 rounded"
-        onClick={() => {
-          setIsOpen(true);
-        }}
+        onClick={onOpen}
       >
         Start a conversation
       </button>
