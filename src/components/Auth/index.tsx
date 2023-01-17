@@ -6,7 +6,7 @@ import { FcGoogle } from "react-icons/fc";
 import userOperations from "../../graphql/operations/user";
 import toast from "react-hot-toast";
 import { createUsernameData, createUsernameVariables } from "../../util/types";
-import Spinner from "../ui/spinner";
+import Spinner from "../ui/Spinner";
 
 interface IAuthProps {
   session: Session | null;

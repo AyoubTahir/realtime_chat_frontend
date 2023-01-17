@@ -19,4 +19,5 @@ export interface searchUsersData {
 export interface searchedUser {
   id: string;
   username: string;
+  image: string;
 }
