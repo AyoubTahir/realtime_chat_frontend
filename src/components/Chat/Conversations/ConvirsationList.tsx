@@ -22,7 +22,7 @@ const ConvirsationList: React.FC<ConvirsationListProps> = ({ session }) => {
       >
         Start a conversation
       </button>
-      <Modal isOpen={isOpen} onClose={onClose} />
+      <Modal isOpen={isOpen} session={session} onClose={onClose} />
     </div>
   );
 };

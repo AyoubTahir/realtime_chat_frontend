@@ -1,4 +1,4 @@
-import { useLazyQuery, useQuery } from "@apollo/client";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
 import {
   ChangeEvent,
   FormEvent,
@@ -6,21 +6,27 @@ import {
   useState,
 } from "react";
 import userOperations from "../../../../graphql/operations/user";
+import conversationsOperations from "../../../../graphql/operations/conversations";
 import {
   searchUsersData,
   searchUsersInput,
   searchedUser,
+  createConversationData,
+  createConversationVariables,
 } from "../../../../util/types";
 import UserSearchList from "./UserSearchList";
 import Spinner from "../../../ui/Spinner";
 import Participants from "./Participants";
+import { toast } from "react-hot-toast";
+import { Session } from "next-auth";
 
 type indexProps = {
   isOpen: boolean;
   onClose: () => void;
+  session: Session;
 };
 
-const index: React.FC<indexProps> = ({ isOpen, onClose }) => {
+const index: React.FC<indexProps> = ({ isOpen, onClose, session }) => {
   const [username, setUsername] = useState("");
   const [participants, setParticipants] = useState<Array<searchedUser>>([]);
 
@@ -28,6 +34,11 @@ const index: React.FC<indexProps> = ({ isOpen, onClose }) => {
     searchUsersData,
     searchUsersInput
   >(userOperations.Queries.searchUsers);
+
+  const [createConversation, { loading: createConversationLoading }] =
+    useMutation<createConversationData, createConversationVariables>(
+      conversationsOperations.Mutations.createConversation
+    );
 
   console.log("searched data: ", data);
 
@@ -49,6 +60,24 @@ const index: React.FC<indexProps> = ({ isOpen, onClose }) => {
 
   const removeParticipant = (userId: string) => {
     setParticipants(participants.filter((user) => user.id !== userId));
+  };
+
+  const handleCreateConversation = async () => {
+    const participantsIds = [
+      ...participants.map((p) => p.id),
+      session?.user?.id,
+    ];
+    try {
+      const { data } = await createConversation({
+        variables: {
+          participantsIds,
+        },
+      });
+      console.log(data);
+    } catch (error: any) {
+      console.log("Create conversation error: ", error);
+      toast.error(error?.message);
+    }
   };
 
   return (
@@ -113,19 +142,23 @@ const index: React.FC<indexProps> = ({ isOpen, onClose }) => {
               />
             )}
             {participants.length > 0 && (
-              <Participants
-                participants={participants}
-                removeParticipant={removeParticipant}
-              />
+              <>
+                <Participants
+                  participants={participants}
+                  removeParticipant={removeParticipant}
+                />
+                <button
+                  className="w-full py-2 bg-blue-700 rounded"
+                  onClick={handleCreateConversation}
+                >
+                  {createConversationLoading ? (
+                    <Spinner />
+                  ) : (
+                    "Create Conversation"
+                  )}
+                </button>
+              </>
             )}
-            <div>
-              <a
-                href="#"
-                className="inline-flex items-center text-xs font-normal text-gray-500 hover:underline dark:text-gray-400"
-              >
-                Why do I need to connect with my wallet?
-              </a>
-            </div>
           </div>
         </div>
       </div>

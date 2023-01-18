@@ -11,10 +11,16 @@ const Participants: React.FC<ParticipantsProps> = ({
   removeParticipant,
 }) => {
   return (
-    <div className="mt-2 flex flex-wrap gap-2">
-      <div className="flex items-center gap-1 bg-slate-600 rounded py-1 px-4">
-        dfd <HiOutlineTrash />
-      </div>
+    <div className="mt-2 flex flex-wrap gap-2 mb-4">
+      {participants.map((user) => (
+        <div
+          key={user.id}
+          className="flex items-center gap-1 bg-slate-600 rounded py-1 px-4"
+        >
+          {user.username}{" "}
+          <HiOutlineTrash onClick={() => removeParticipant(user.id)} />
+        </div>
+      ))}
     </div>
   );
 };
